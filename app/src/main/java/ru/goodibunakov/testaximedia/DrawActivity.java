@@ -27,7 +27,7 @@ public class DrawActivity extends AppCompatActivity {
 
         setContentView(R.layout.layout_draw);
 
-        File file = (File) getIntent().getSerializableExtra("file");
+        File file = new File(getIntent().getStringExtra("file_path"));
 
         ImageView editImage = (ImageView) findViewById(R.id.edit_image);
 

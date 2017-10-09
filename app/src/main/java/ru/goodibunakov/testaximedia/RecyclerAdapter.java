@@ -75,7 +75,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
             if (position != RecyclerView.NO_POSITION) {
                 File file = photos.get(position);
                 Intent intent = new Intent(v.getContext(), DrawActivity.class);
-                intent.putExtra("file", file);
+                intent.putExtra("file_path", file.getAbsolutePath());
                 v.getContext().startActivity(intent);
             }
         }
