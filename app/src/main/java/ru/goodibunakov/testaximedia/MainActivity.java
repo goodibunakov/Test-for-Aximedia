@@ -35,6 +35,8 @@ public class MainActivity extends AppCompatActivity {
     List<File> inFiles = new ArrayList<>();
     RecyclerAdapter recyclerAdapter;
     File path = null; // для создания директории куда копируем выбранную фотку
+    RecyclerView recyclerView;
+    TextView txtEmpty;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,24 +47,15 @@ public class MainActivity extends AppCompatActivity {
 
         path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES + "/myAppImages/");
 
-        TextView txtEmpty = (TextView) findViewById(R.id.txt_empty);
+        txtEmpty = (TextView) findViewById(R.id.txt_empty);
 
-        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.rv);
+        recyclerView = (RecyclerView) findViewById(R.id.rv);
         recyclerView.setLayoutManager(new GridLayoutManager(this,2));
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         getAddedPhotos(path);
         Log.d("inFiles.size()", String.valueOf(inFiles.size()));
         recyclerAdapter = new RecyclerAdapter(inFiles);
         recyclerView.setAdapter(recyclerAdapter);
-
-
-//        if (inFiles.size() < 1){
-//            recyclerView.setVisibility(View.INVISIBLE);
-//            txtEmpty.setVisibility(View.VISIBLE);
-//        } else {
-//            recyclerView.setVisibility(View.VISIBLE);
-//            txtEmpty.setVisibility(View.INVISIBLE);
-//        }
 
         final FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -90,7 +83,6 @@ public class MainActivity extends AppCompatActivity {
                 super.onScrollStateChanged(recyclerView, newState);
             }
         });
-
     }
 
     @Override
@@ -141,7 +133,6 @@ public class MainActivity extends AppCompatActivity {
 
                     getAddedPhotos(path);
                     Log.d("getAddedPhotos", getAddedPhotos(path).toString());
-
             }
 
         }
@@ -150,7 +141,6 @@ public class MainActivity extends AppCompatActivity {
 
 
     public boolean copyFile(String from, String to) {
-
         try {
             File fileFrom = new File(from);
             File fileTo = new File(to);
@@ -189,7 +179,6 @@ public class MainActivity extends AppCompatActivity {
         for (File file : files) {
             inFiles.add(file);
         }
-
         return inFiles;
     }
 

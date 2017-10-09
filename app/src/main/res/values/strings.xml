@@ -8,4 +8,6 @@
     <string name="dialog_message">Удалить изображение?</string>
     <string name="dialog_ok">Да</string>
     <string name="dialog_no">Нет</string>
+    <string name="dialog_title_save">Сохранени</string>
+    <string name="dialog_message_save">Сохранить изображение?</string>
 </resources>
