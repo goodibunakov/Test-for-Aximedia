@@ -1,5 +1,7 @@
 <resources>
-    <string name="app_name">TestAximedia</string>
-    <string name="action_settings">Settings</string>
+    <string name="app_name">Test Aximedia</string>
     <string name="splash_text">Тестовое задание</string>
+    <string name="sdcard_not">SD карта не доступна!</string>
+    <string name="copy_successful">Изображение добавлено</string>
+    <string name="emply_list">Добавьте фотографии в галерею</string>
 </resources>

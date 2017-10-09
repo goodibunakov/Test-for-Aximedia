@@ -1,15 +1,40 @@
 package ru.goodibunakov.testaximedia;
 
+import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
-import android.view.Menu;
-import android.view.MenuItem;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
+
+    private static final int REQUEST_GALLERY = 1;
+    List<File> inFiles = new ArrayList<>();
+    RecyclerAdapter recyclerAdapter;
+    File path = null; // для создания директории куда копируем выбранную фотку
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -18,35 +43,156 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES + "/myAppImages/");
+
+        TextView txtEmpty = (TextView) findViewById(R.id.txt_empty);
+
+        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.rv);
+        recyclerView.setLayoutManager(new GridLayoutManager(this,2));
+        recyclerView.setItemAnimator(new DefaultItemAnimator());
+        getAddedPhotos(path);
+        Log.d("inFiles.size()", String.valueOf(inFiles.size()));
+        recyclerAdapter = new RecyclerAdapter(inFiles);
+        recyclerView.setAdapter(recyclerAdapter);
+
+        if (inFiles.size() < 1){
+            recyclerView.setVisibility(View.INVISIBLE);
+            txtEmpty.setVisibility(View.VISIBLE);
+        } else {
+            recyclerView.setVisibility(View.VISIBLE);
+            txtEmpty.setVisibility(View.INVISIBLE);
+        }
+
+        final FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                Intent intent = new Intent(Intent.ACTION_PICK);
+                intent.setType("image/*");
+                startActivityForResult(intent, REQUEST_GALLERY);
             }
         });
+
+        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                if (dy > 0 || dy < 0 && fab.isShown())
+                    fab.hide();
+            }
+
+            @Override
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+
+                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                    fab.show();
+                }
+                super.onScrollStateChanged(recyclerView, newState);
+            }
+        });
+
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+
+        String realPathFromURI; //путь к выбранной фотке
+        String pathTo;
+
+        if (requestCode == REQUEST_GALLERY) {
+            if (resultCode == RESULT_OK) {
+                    //получаем URI выбранной фотки из интента
+                    final Uri imageUri = data.getData();
+                    Log.d("imageUri", imageUri.toString());
+                    Log.d("getPath", imageUri.getPath());
+                    Log.d("DIRECTORY_PICTURES", Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).getAbsolutePath());
+                    Cursor cursor = null;
+                    //получаем путь к фотке из URI
+                    try {
+                        String[] proj = {MediaStore.Images.Media.DATA};
+                        cursor = getContentResolver().query(imageUri, proj, null, null, null);
+                        int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+                        cursor.moveToFirst();
+                        realPathFromURI = cursor.getString(column_index);
+                    } finally {
+                        if (cursor != null) {
+                            cursor.close();
+                        }
+                    }
+                    Log.d("realPathFromURI", realPathFromURI);
+
+
+                    if (isExternalStorageWritable()) {
+                        //path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES + "/myAppImages/");
+                        if (!path.exists()) {
+                            path.mkdir();
+                        }
+                        pathTo = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).getAbsolutePath()
+                                + "/myAppImages/" + imageUri.getLastPathSegment();
+
+                        //копируем фотку
+                        Boolean isSuccess = copyFile(realPathFromURI, pathTo);
+
+                        if (isSuccess)
+                            Toast.makeText(MainActivity.this, getResources().getString(R.string.copy_successful), Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(MainActivity.this, getResources().getString(R.string.sdcard_not), Toast.LENGTH_SHORT).show();
+                    }
+
+                    getAddedPhotos(path);
+                    Log.d("getAddedPhotos", getAddedPhotos(path).toString());
+
+            }
+
+        }
+        super.onActivityResult(requestCode, resultCode, data);
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+    public boolean copyFile(String from, String to) {
+
+        try {
+            File fileFrom = new File(from);
+            File fileTo = new File(to);
+            InputStream in = new FileInputStream(fileFrom); // Создаем потоки
+            OutputStream out = new FileOutputStream(fileTo);
+            byte[] buf = new byte[1024];
+            int len;
+            while ((len = in.read(buf)) > 0) {
+                out.write(buf, 0, len);
+            }
+            in.close(); // Закрываем потоки
+            out.close();
+        } catch (FileNotFoundException ex) {
+            // Обработка ошибок
+            ex.printStackTrace();
+        } catch (IOException e) {
+            // Обработка ошибок
+            e.printStackTrace();
+        }
+        recyclerAdapter.notifyDataSetChanged();
+        return true; // При удачной операции возвращаем true
+    }
+
+    public boolean isExternalStorageWritable() {
+        String state = Environment.getExternalStorageState();
+        if (Environment.MEDIA_MOUNTED.equals(state)) {
             return true;
         }
+        return false;
+    }
 
-        return super.onOptionsItemSelected(item);
+    public List<File> getAddedPhotos(File parentDir) {
+        inFiles.clear();
+
+        File[] files = parentDir.listFiles();
+        for (File file : files) {
+            inFiles.add(file);
+        }
+
+        return inFiles;
+    }
+
+    @Override
+    public void onBackPressed() {
     }
 }
