@@ -55,13 +55,14 @@ public class MainActivity extends AppCompatActivity {
         recyclerAdapter = new RecyclerAdapter(inFiles);
         recyclerView.setAdapter(recyclerAdapter);
 
-        if (inFiles.size() < 1){
-            recyclerView.setVisibility(View.INVISIBLE);
-            txtEmpty.setVisibility(View.VISIBLE);
-        } else {
-            recyclerView.setVisibility(View.VISIBLE);
-            txtEmpty.setVisibility(View.INVISIBLE);
-        }
+
+//        if (inFiles.size() < 1){
+//            recyclerView.setVisibility(View.INVISIBLE);
+//            txtEmpty.setVisibility(View.VISIBLE);
+//        } else {
+//            recyclerView.setVisibility(View.VISIBLE);
+//            txtEmpty.setVisibility(View.INVISIBLE);
+//        }
 
         final FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {

@@ -4,4 +4,8 @@
     <string name="sdcard_not">SD карта не доступна!</string>
     <string name="copy_successful">Изображение добавлено</string>
     <string name="emply_list">Добавьте фотографии в галерею</string>
+    <string name="dialog_title">Удаление</string>
+    <string name="dialog_message">Удалить изображение?</string>
+    <string name="dialog_ok">Ок</string>
+    <string name="dialog_no">Нет</string>
 </resources>
