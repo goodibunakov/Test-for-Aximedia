@@ -21,7 +21,6 @@ import java.io.File;
 
 public class DrawActivity extends AppCompatActivity {
 
-    static Boolean wasDrawing = false;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -45,46 +44,31 @@ public class DrawActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        super.onBackPressed();
-        if (wasDrawing) {
-            AlertDialog.Builder ad = new AlertDialog.Builder(DrawActivity.this);
-            ad.setTitle(DrawActivity.this.getResources().getString(R.string.dialog_title_save));  // заголовок
-            ad.setMessage(DrawActivity.this.getResources().getString(R.string.dialog_message_save)); // сообщение
-            ad.setPositiveButton(DrawActivity.this.getResources().getString(R.string.dialog_ok), new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int arg1) {
+        //super.onBackPressed();
 
-//                File fileForDelete = photos.get(position);
-//                File deleteFrom = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES + "/myAppImages/");
-//                File[] files = deleteFrom.listFiles();
-//                for (File file : files) {
-//                    //удаляем файл с диска (с телефона, из памяти, совсем)
-//                    if (file.equals(fileForDelete)) {
-//                        file.delete();
-//                    }
-//                }
-//                //удаляем фотку из List, из которого берет данные адаптер
-//                photos.remove(position);
-//                //говорим адаптеру что фотка удалена
-//                notifyItemRemoved(position);
-//                notifyItemRangeChanged(position, photos.size());
+        AlertDialog.Builder ad = new AlertDialog.Builder(DrawActivity.this);
+        ad.setTitle(DrawActivity.this.getResources().getString(R.string.dialog_title_save));  // заголовок
+        ad.setMessage(DrawActivity.this.getResources().getString(R.string.dialog_message_save)); // сообщение
+        ad.setPositiveButton(DrawActivity.this.getResources().getString(R.string.dialog_ok), new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int arg1) {
 
-                    Toast.makeText(DrawActivity.this, "Изображение сохранено",
-                            Toast.LENGTH_SHORT).show();
+
+                Toast.makeText(DrawActivity.this, "Изображение сохранено",
+                        Toast.LENGTH_SHORT).show();
+                DrawActivity.this.finish();
+            }
+        });
+        ad.setNegativeButton(DrawActivity.this.getResources().getString(R.string.dialog_no), new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int arg1) {
+                dialog.dismiss();
+                try {
+                    DrawActivity.this.finish();
+                } catch (Throwable throwable) {
+                    throwable.printStackTrace();
                 }
-            });
-            ad.setNegativeButton(DrawActivity.this.getResources().getString(R.string.dialog_no), new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int arg1) {
-                    dialog.dismiss();
-                    try {
-                        DrawActivity.this.finish();
-                    } catch (Throwable throwable) {
-                        throwable.printStackTrace();
-                    }
-                }
-            });
-            ad.setCancelable(false);
-            AlertDialog deleteDialog = ad.create();
-            deleteDialog.show();
-        }
+            }
+        });
+        ad.setCancelable(false);
+        ad.create().show();
     }
 }

@@ -16,7 +16,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static ru.goodibunakov.testaximedia.DrawActivity.wasDrawing;
 
 /**
  * Created by GooDi on 09.10.2017.
@@ -36,25 +35,20 @@ public class RectDrawView extends View {
         String action = "";
         switch (event.getAction()){
             case MotionEvent.ACTION_DOWN:
-                wasDrawing = true;
-                action = "ACTION_DOWN";
                 //сброс текущего состояния
                 currentRect = new Rect(current);
                 rects.add(currentRect);
                 break;
             case MotionEvent.ACTION_MOVE:
-                action = "ACTION_MOVE";
                 if (currentRect != null){
                     currentRect.setCurrentRect(current);
                     invalidate();
                 }
                 break;
             case MotionEvent.ACTION_UP:
-                action = "ACTION_UP";
                 currentRect = null;
                 break;
             case MotionEvent.ACTION_CANCEL:
-                action = "ACTION_CANCEL";
                 currentRect = null;
                 break;
         }
