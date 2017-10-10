@@ -1,7 +1,6 @@
 package ru.goodibunakov.testaximedia;
 
 import android.content.Intent;
-import android.view.Window;
 
 import com.daimajia.androidanimations.library.Techniques;
 import com.viksaa.sssplash.lib.activity.AwesomeSplash;
@@ -13,10 +12,6 @@ import com.viksaa.sssplash.lib.model.ConfigSplash;
  */
 
 public class Splash extends AwesomeSplash {
-
-    //DO NOT OVERRIDE onCreate()!
-    //if you need to start some services do it in initSplash()!
-
 
     @Override
     public void initSplash(ConfigSplash configSplash) {

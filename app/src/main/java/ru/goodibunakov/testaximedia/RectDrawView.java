@@ -1,6 +1,8 @@
 package ru.goodibunakov.testaximedia;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.PointF;
@@ -15,6 +17,8 @@ import android.view.View;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import static ru.goodibunakov.testaximedia.DrawActivity.file;
 
 
 /**
@@ -32,15 +36,14 @@ public class RectDrawView extends View {
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         PointF current = new PointF(event.getX(), event.getY());
-        String action = "";
-        switch (event.getAction()){
+        switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 //сброс текущего состояния
                 currentRect = new Rect(current);
                 rects.add(currentRect);
                 break;
             case MotionEvent.ACTION_MOVE:
-                if (currentRect != null){
+                if (currentRect != null) {
                     currentRect.setCurrentRect(current);
                     invalidate();
                 }
@@ -63,7 +66,7 @@ public class RectDrawView extends View {
     public RectDrawView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
 
-        //прямоугольники рисуются полупрозрачным cehsv цветом
+        //прямоугольники рисуются полупрозрачным серым цветом
         rectPaint = new Paint();
         rectPaint.setColor(getResources().getColor(R.color.colorRect));
 
@@ -75,9 +78,24 @@ public class RectDrawView extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         //заполнение фона
-        //canvas.drawPaint(backgroundPaint);
+//        Bitmap bp = BitmapFactory.decodeFile(file.getAbsolutePath());
+//        final int maxSize = 1200;
+//        int outWidth;
+//        int outHeight;
+//        int inWidth = bp.getWidth();
+//        int inHeight = bp.getHeight();
+//        if (inWidth > inHeight) {
+//            outWidth = maxSize;
+//            outHeight = (inHeight * maxSize) / inWidth;
+//        } else {
+//            outHeight = maxSize;
+//            outWidth = (inWidth * maxSize) / inHeight;
+//        }
 
-        for (Rect rect : rects){
+        //Bitmap resizedBitmap = Bitmap.createScaledBitmap(bp, outWidth, outHeight, false);
+        canvas.drawBitmap(BitmapFactory.decodeFile(file.getAbsolutePath()), 0, 0, null);
+
+        for (Rect rect : rects) {
             float left = Math.min(rect.getOriginRect().x, rect.getCurrentRect().x);
             float right = Math.max(rect.getOriginRect().x, rect.getCurrentRect().x);
             float top = Math.min(rect.getOriginRect().y, rect.getCurrentRect().y);
@@ -94,7 +112,7 @@ public class RectDrawView extends View {
         Bundle bundle = new Bundle();
         bundle.putParcelable(PARENT_STATE_KEY, parentState);
         bundle.putParcelableArray(BOXEN_KEY, rects.toArray(new Rect[rects.size()]));
-Log.d("onSaveInstanceState", bundle.toString());
+        Log.d("onSaveInstanceState", bundle.toString());
         return bundle;
     }
 

@@ -10,9 +10,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
@@ -50,7 +48,7 @@ public class MainActivity extends AppCompatActivity {
         txtEmpty = (TextView) findViewById(R.id.txt_empty);
 
         recyclerView = (RecyclerView) findViewById(R.id.rv);
-        recyclerView.setLayoutManager(new GridLayoutManager(this,2));
+        recyclerView.setLayoutManager(new GridLayoutManager(this, 2));
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         getAddedPhotos(path);
         Log.d("inFiles.size()", String.valueOf(inFiles.size()));
@@ -86,6 +84,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        getAddedPhotos(path);
+        recyclerAdapter.notifyDataSetChanged();
+    }
+
+    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 
         String realPathFromURI; //путь к выбранной фотке
@@ -93,46 +98,45 @@ public class MainActivity extends AppCompatActivity {
 
         if (requestCode == REQUEST_GALLERY) {
             if (resultCode == RESULT_OK) {
-                    //получаем URI выбранной фотки из интента
-                    final Uri imageUri = data.getData();
-                    Log.d("imageUri", imageUri.toString());
-                    Log.d("getPath", imageUri.getPath());
-                    Log.d("DIRECTORY_PICTURES", Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).getAbsolutePath());
-                    Cursor cursor = null;
-                    //получаем путь к фотке из URI
-                    try {
-                        String[] proj = {MediaStore.Images.Media.DATA};
-                        cursor = getContentResolver().query(imageUri, proj, null, null, null);
-                        int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-                        cursor.moveToFirst();
-                        realPathFromURI = cursor.getString(column_index);
-                    } finally {
-                        if (cursor != null) {
-                            cursor.close();
-                        }
+                //получаем URI выбранной фотки из интента
+                final Uri imageUri = data.getData();
+                Log.d("imageUri", imageUri.toString());
+                Log.d("getPath", imageUri.getPath());
+                Log.d("DIRECTORY_PICTURES", Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).getAbsolutePath());
+                Cursor cursor = null;
+                //получаем путь к фотке из URI
+                try {
+                    String[] proj = {MediaStore.Images.Media.DATA};
+                    cursor = getContentResolver().query(imageUri, proj, null, null, null);
+                    int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+                    cursor.moveToFirst();
+                    realPathFromURI = cursor.getString(column_index);
+                } finally {
+                    if (cursor != null) {
+                        cursor.close();
                     }
-                    Log.d("realPathFromURI", realPathFromURI);
+                }
+                Log.d("realPathFromURI", realPathFromURI);
 
 
-                    if (isExternalStorageWritable()) {
-                        //path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES + "/myAppImages/");
-                        if (!path.exists()) {
-                            path.mkdir();
-                        }
-                        pathTo = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).getAbsolutePath()
-                                + "/myAppImages/" + imageUri.getLastPathSegment();
-
-                        //копируем фотку
-                        Boolean isSuccess = copyFile(realPathFromURI, pathTo);
-
-                        if (isSuccess)
-                            Toast.makeText(MainActivity.this, getResources().getString(R.string.copy_successful), Toast.LENGTH_SHORT).show();
-                    } else {
-                        Toast.makeText(MainActivity.this, getResources().getString(R.string.sdcard_not), Toast.LENGTH_SHORT).show();
+                if (isExternalStorageWritable()) {
+                    if (!path.exists()) {
+                        path.mkdir();
                     }
+                    pathTo = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).getAbsolutePath()
+                            + "/myAppImages/" + imageUri.getLastPathSegment();
 
-                    getAddedPhotos(path);
-                    Log.d("getAddedPhotos", getAddedPhotos(path).toString());
+                    //копируем фотку
+                    Boolean isSuccess = copyFile(realPathFromURI, pathTo);
+
+                    if (isSuccess)
+                        Toast.makeText(MainActivity.this, getResources().getString(R.string.copy_successful), Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(MainActivity.this, getResources().getString(R.string.sdcard_not), Toast.LENGTH_SHORT).show();
+                }
+
+                getAddedPhotos(path);
+                Log.d("getAddedPhotos", getAddedPhotos(path).toString());
             }
 
         }
@@ -153,9 +157,6 @@ public class MainActivity extends AppCompatActivity {
             }
             in.close(); // Закрываем потоки
             out.close();
-        } catch (FileNotFoundException ex) {
-            // Обработка ошибок
-            ex.printStackTrace();
         } catch (IOException e) {
             // Обработка ошибок
             e.printStackTrace();
