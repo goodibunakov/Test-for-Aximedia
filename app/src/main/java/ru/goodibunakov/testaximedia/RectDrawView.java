@@ -1,9 +1,8 @@
 package ru.goodibunakov.testaximedia;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PointF;
 import android.os.Bundle;
@@ -18,7 +17,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static ru.goodibunakov.testaximedia.DrawActivity.file;
+import static ru.goodibunakov.testaximedia.DrawActivity.scaledBitmap;
 
 
 /**
@@ -77,23 +76,16 @@ public class RectDrawView extends View {
 
     @Override
     protected void onDraw(Canvas canvas) {
+        //определяем centreX и centreY для размещения bitmap в центре canvas
+        float canvasHeight = canvas.getHeight();
+        float canvasWidth = canvas.getWidth();
+        float bitmapHeight = scaledBitmap.getHeight();
+        float bitmapWidth = scaledBitmap.getWidth();
+        float centreX = (canvasWidth  - bitmapWidth) / 2;
+        float centreY = (canvasHeight - bitmapHeight) / 2;
         //заполнение фона
-//        Bitmap bp = BitmapFactory.decodeFile(file.getAbsolutePath());
-//        final int maxSize = 1200;
-//        int outWidth;
-//        int outHeight;
-//        int inWidth = bp.getWidth();
-//        int inHeight = bp.getHeight();
-//        if (inWidth > inHeight) {
-//            outWidth = maxSize;
-//            outHeight = (inHeight * maxSize) / inWidth;
-//        } else {
-//            outHeight = maxSize;
-//            outWidth = (inWidth * maxSize) / inHeight;
-//        }
-
-        //Bitmap resizedBitmap = Bitmap.createScaledBitmap(bp, outWidth, outHeight, false);
-        canvas.drawBitmap(BitmapFactory.decodeFile(file.getAbsolutePath()), 0, 0, null);
+        canvas.drawColor(Color.BLACK);
+        canvas.drawBitmap(scaledBitmap, centreX, centreY, null);
 
         for (Rect rect : rects) {
             float left = Math.min(rect.getOriginRect().x, rect.getCurrentRect().x);

@@ -2,6 +2,7 @@ package ru.goodibunakov.testaximedia;
 
 import android.content.DialogInterface;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.Nullable;
@@ -22,7 +23,8 @@ import java.io.IOException;
 
 public class DrawActivity extends AppCompatActivity {
 
-    static File file;
+    File file;
+    static Bitmap scaledBitmap;
     RectDrawView rectDrawView;
 
     @Override
@@ -35,9 +37,39 @@ public class DrawActivity extends AppCompatActivity {
 
         setContentView(R.layout.layout_draw);
 
+        //получаем объект File из интента
         file = new File(getIntent().getStringExtra("file_path"));
         rectDrawView = (RectDrawView) findViewById(R.id.rects_draw);
         rectDrawView.setDrawingCacheEnabled(true);
+
+        //создаем объект Bitmap из объекта File
+        Bitmap bitmap = Bitmap.createBitmap(BitmapFactory.decodeFile(file.getAbsolutePath()));
+        //определяем размеры экрана
+        int width = getWindowManager().getDefaultDisplay().getWidth();
+        int height = getWindowManager().getDefaultDisplay().getHeight();
+        //создаем новый Bitmap по размеру экрана
+        scaledBitmap = resize(bitmap, width, height);
+    }
+
+    private static Bitmap resize(Bitmap image, int maxWidth, int maxHeight) {
+        if (maxHeight > 0 && maxWidth > 0) {
+            int width = image.getWidth();
+            int height = image.getHeight();
+            float ratioBitmap = (float) width / (float) height;
+            float ratioMax = (float) maxWidth / (float) maxHeight;
+
+            int finalWidth = maxWidth;
+            int finalHeight = maxHeight;
+            if (ratioMax > 1) {
+                finalWidth = (int) ((float)maxHeight * ratioBitmap);
+            } else {
+                finalHeight = (int) ((float)maxWidth / ratioBitmap);
+            }
+            image = Bitmap.createScaledBitmap(image, finalWidth, finalHeight, true);
+            return image;
+        } else {
+            return image;
+        }
     }
 
     @Override
